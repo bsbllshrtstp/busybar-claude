@@ -1,1 +1,13 @@
-{ "name": "busybar-context", "version": "0.1.0", "description": "Sends the context window breakdown to the BUSY Bar bridge so the bar can show it" }
+{
+  "name": "busybar-context",
+  "version": "0.2.0",
+  "description": "Shows Claude Code's context window and task list on a BUSY Bar, via the busybar-claude bridge",
+  "userConfig": {
+    "task_list": {
+      "type": "boolean",
+      "title": "Always keep a task list",
+      "description": "Ask Claude to plan every multi-step request as a task list and keep it current, so the bar can show progress",
+      "default": true
+    }
+  }
+}

@@ -45,6 +45,7 @@ function ascii(s, limit = 60) {
 
 function toolDetail(name, input = {}) {
   let n = name || "Tool";
+  if (n === "mcp__busybar-context__tasks") return "Updating tasks";
   if (n.startsWith("mcp__")) n = n.split("__").pop();
   let d = "";
   if (input.command) d = input.command;
@@ -324,6 +325,20 @@ const server = http.createServer((req, res) => {
       contexts.delete(c.session_id); // re-insert last, so the oldest go first below
       if (contexts.size >= 32) contexts.delete(contexts.keys().next().value);
       contexts.set(c.session_id, { total: c.total, max: c.max, percentage: c.percentage, categories: c.categories });
+    });
+  }
+  if (req.method === "POST" && url.pathname === "/tasks" && isLoopback(req)) {
+    // From the busybar-context mod's task list tool: the whole list, every time.
+    return readJson(req, res, (b) => {
+      if (!b.session_id || !Array.isArray(b.tasks)) throw new Error("bad tasks");
+      const s = sessions.get(b.session_id);
+      if (!s) return; // hook events create sessions; nothing to attach to yet
+      s.tasks = b.tasks.slice(0, 50).map((t, i) => ({
+        id: String(i + 1),
+        status: t.status,
+        label: t.active || t.title || "",
+        subject: t.title || t.active || "",
+      }));
     });
   }
   if (req.method === "POST" && url.pathname === "/event" && isLoopback(req)) {

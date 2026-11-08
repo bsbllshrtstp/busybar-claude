@@ -22,7 +22,12 @@ With no task list, the top row shows the project and how long the turn has been 
 | DONE 2m14s | turn finished (LED blinks) | green | hops with a happy face |
 | WAITING | idle, waiting for your next prompt | gray | asleep, z's drifting up |
 
-Progress comes from Claude's task list (`TodoWrite`, or `TaskCreate`/`TaskUpdate`).
+Progress comes from Claude's task list. Most sessions don't offer Claude a task-list tool,
+so the `busybar-context` mod adds one, `mcp__busybar-context__tasks`. It runs without a
+permission prompt, and a system prompt section asks Claude to plan every multi-step request
+with it and keep it current. Turn that off with the mod's **Always keep a task list** option
+in `/config`. The built-in `TodoWrite` and `TaskCreate`/`TaskUpdate` lists show up on the bar
+too, when a session uses them.
 
 Press **Start** to see the context window instead. It shows a bar split by what fills the
 window (system prompt, tools, MCP, memory, messages), with the autocompact reserve at the far
@@ -35,14 +40,14 @@ no API call) whenever the context changes.
 
 ```
 Claude Code hooks ──curl POST /event──▶ bridge/server.mjs (Mac :7878) ◀──GET /status every 2 s── app on the bar
-busybar-context mod ──POST /context──▶
+busybar-context mod ──POST /context, /tasks──▶
 ```
 
 - **`app/`** is the BUSY Bar app (`app.thaight.claude`), built with
   [busy-tools](https://github.com/busy-app/busy-tools). It runs on the bar. Over the device
   API it only uses `display/draw` and `apps/settings`.
-- **`mod/busybar-context/`** is a Claude Code mod that posts the context window breakdown to
-  the bridge.
+- **`mod/busybar-context/`** is a Claude Code mod. It posts the context window breakdown to
+  the bridge, and gives Claude the task-list tool the bar's progress comes from.
 - **`bridge/`** is a dependency-free Node server on the Mac. Claude Code hooks post every
   event to it on loopback, and it keeps per-session state in memory. The bar polls
   `GET /status`, which accepts only loopback and private-network clients.
