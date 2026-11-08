@@ -1,0 +1,5 @@
+{
+  "name": "busybar-claude",
+  "owner": { "name": "Tom Haight" },
+  "plugins": [{ "name": "busybar-context", "source": "./mod/busybar-context" }]
+}

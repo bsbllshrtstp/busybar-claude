@@ -1,0 +1,19 @@
+{
+  "format_version": 1,
+  "version": 1,
+  "fields": {
+    "bridge": {
+      "type": "string",
+      "label": "Bridge address",
+      "description": "host:port of the bridge running on your Mac. Leave empty to use the USB link (10.0.4.21:7878).",
+      "default": "",
+      "max_length": 64
+    },
+    "blink_led": {
+      "type": "boolean",
+      "label": "Blink LED",
+      "description": "Blink the status LED when Claude needs approval or finishes a turn.",
+      "default": true
+    }
+  }
+}
