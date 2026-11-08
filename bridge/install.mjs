@@ -76,17 +76,25 @@ function updateHooks() {
   );
 }
 
+/** Runs launchctl; true if it succeeded. */
 function launchctl(...args) {
   try {
     execFileSync("launchctl", args, { stdio: "ignore" });
+    return true;
   } catch {
-    // bootout of an agent that is not loaded fails; that is fine.
+    return false; // e.g. bootout of an agent that is not loaded
   }
+}
+
+/** `bootout` returns before the agent is gone, and a `bootstrap` in that window fails. */
+function waitUnloaded(target) {
+  for (let i = 0; i < 50 && launchctl("print", target); i++) execFileSync("sleep", ["0.1"]);
 }
 
 function updateAgent() {
   const domain = `gui/${process.getuid()}`;
   launchctl("bootout", `${domain}/${LABEL}`);
+  waitUnloaded(`${domain}/${LABEL}`);
   if (uninstall) {
     fs.rmSync(PLIST, { force: true });
     console.log("Removed the bridge launch agent");
@@ -113,7 +121,11 @@ function updateAgent() {
 `;
   fs.mkdirSync(path.dirname(PLIST), { recursive: true });
   fs.writeFileSync(PLIST, plist);
-  launchctl("bootstrap", domain, PLIST);
+  if (!launchctl("bootstrap", domain, PLIST)) {
+    console.error(`Could not start the bridge: launchctl bootstrap ${domain} ${PLIST} failed`);
+    process.exitCode = 1;
+    return;
+  }
   console.log(`Bridge running on port ${PORT} via launchd (${PLIST}), log: ${LOG}`);
 }
 
